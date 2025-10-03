@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import pandas as pd
 from datetime import datetime
@@ -10,8 +11,8 @@ from telegram.ext import (
     filters,
 )
 
-BOT_TOKEN = "8277642018:AAGPQFPq_j42oAfyu6hbDiQrVQniFcbQR0c"
-ADMIN_CHAT_ID = 320358268
+BOT_TOKEN = os.getenv("8277642018:AAGPQFPq_j42oAfyu6hbDiQrVQniFcbQR0c")
+ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID", "320358268"))
 DB_PATH = "messages.db"
 
 # --- Инициализация базы ---
@@ -50,9 +51,8 @@ async def send_ids(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     chat = update.effective_chat
     user = update.effective_user
-    message_text = update.effective_message.text or "—"
+    message_text = update.effective_message.text_html or "—"
 
-    # Сохраняем в базу
     save_message(
         user_id=user.id,
         chat_id=chat.id,
@@ -117,7 +117,7 @@ def main():
 
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("report", report_command))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, send_ids))
+    app.add_handler(MessageHandler(filters.ALL, send_ids))
 
     print("Бот запущен...")
     app.run_polling()
